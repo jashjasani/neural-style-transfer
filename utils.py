@@ -4,6 +4,8 @@ import numpy as np
 from torchvision import transforms
 from models.vgg16 import Vgg16
 import matplotlib.pyplot as plt
+import torch
+
 
 IMAGENET_MEAN_255 = [123.675, 116.28, 103.53]
 IMAGENET_STD_NEUTRAL = [1, 1, 1]
@@ -77,5 +79,34 @@ def visualize_filter(content_representation, filter_index):
 
 
 
-def gram_matrix():
-    pass
+def gram_matrix(x, should_normalize=True):
+    (b, ch, h, w) = x.size()
+    features = x.view(b, ch, w * h)
+    features_t = features.transpose(1, 2)
+    gram = features.bmm(features_t)
+    if should_normalize:
+        gram /= ch * h * w
+    return gram
+
+
+def total_variation(y):
+    return torch.sum(torch.abs(y[:, :, :, :-1] - y[:, :, :, 1:])) + \
+           torch.sum(torch.abs(y[:, :, :-1, :] - y[:, :, 1:, :]))
+
+
+
+def save_image(optimizing_img, dump_path, img_name, it):
+    
+    if not os.path.exists(dump_path):
+        os.mkdir(dump_path)
+
+    out_img = optimizing_img.squeeze(axis=0).to('cpu').detach().numpy()
+    out_img = np.moveaxis(out_img, 0, 2)  # swap channel from 1st to 3rd position: ch, _, _ -> _, _, chr
+
+
+    img_format = ".jpg"
+    out_img_name = img_name + str(it) + img_format
+    dump_img = np.copy(out_img)
+    dump_img += np.array(IMAGENET_MEAN_255).reshape((1, 1, 3))
+    dump_img = np.clip(dump_img, 0, 255).astype('uint8')
+    cv.imwrite(os.path.join(dump_path, out_img_name), dump_img[:, :, ::-1])
