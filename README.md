@@ -16,6 +16,10 @@ We freeze the weights of the model and optimize the image using content loss, st
 - Variation loss is the loss between horizontal pixels to vertical pixels (smoothens the appearance)
 
 
-## sample 
+## Sample output 
+<div style="display:flex;">
+<img src="./samples/content.jpg" width="250px" height="300px" style="margin-right:10px" title="Content image">
+<img src="./samples/style-van-ghogh.jpg" width="250px" height="300px"  style="margin-right:10px" title="Style image">
 
-
+<img src="./samples/target.jpg" width="250px" height="300px" title="Target image">
+</div>
